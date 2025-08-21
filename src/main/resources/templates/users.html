@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Dashboard - Upload Notes</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex h-screen bg-gray-100">
+
+<!-- Sidebar -->
+<aside class="bg-indigo-700 text-white w-64 flex-shrink-0 hidden md:flex flex-col transition-transform duration-300" id="sidebar">
+    <div class="p-6 text-2xl font-bold border-b border-indigo-600">
+        Admin Panel
+    </div>
+    <nav class="flex-1 p-4 space-y-3">
+        <a href="/user/admin" class="block py-2 px-4 rounded-lg hover:bg-indigo-600 transition">🏠 Dashboard</a>
+        <a href="/user/upload" class="block py-2 px-4 rounded-lg hover:bg-indigo-600 transition">📘 Manage Notes</a>
+        <a href="/user/admin/users" class="block py-2 px-4 rounded-lg hover:bg-indigo-600 transition">👤 Manage Users</a>
+        <a href="/user/admin/payments" class="block py-2 px-4 rounded-lg hover:bg-indigo-600 transition">💳 Payments</a>
+        <a href="/user/payments/list" class="block py-2 px-4 rounded-lg hover:bg-indigo-600 transition">📦 Plans</a>
+       <!-- <a href="/admin/settings" class="block py-2 px-4 rounded-lg hover:bg-indigo-600 transition">⚙️ Settings</a>   -->
+    </nav>
+    <div class="p-4 border-t border-indigo-600">
+        <a href="/logout" class="block py-2 px-4 bg-red-500 hover:bg-red-600 rounded-lg text-center transition">
+            🚪 Logout
+        </a>
+    </div>
+</aside>
+
+<!-- Main Content -->
+<div class="flex-1 flex flex-col">
+
+    <!-- Top Navbar -->
+    <header class="bg-white shadow p-4 flex justify-between items-center md:justify-between">
+        <div class="flex items-center space-x-4">
+            <button class="md:hidden text-gray-600" id="menu-toggle">☰</button>
+            <h1 class="text-xl font-bold text-gray-700">Upload New Note 📤</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span class="text-gray-500 hidden sm:inline">admin@mynotes.com</span>
+            <img src="https://ui-avatars.com/api/?name=Admin&background=4f46e5&color=fff"
+                 alt="Admin Avatar" class="w-10 h-10 rounded-full">
+        </div>
+    </header>
+
+   
+<section class="max-w-7xl mx-auto bg-white rounded-xl shadow p-6 mt-6">
+    <h1 class="text-2xl font-bold mb-4">👤 Users (Total: <span th:text="${usersCount}">0</span>)</h1>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white rounded-lg shadow">
+            <thead class="bg-indigo-700 text-white">
+                <tr>
+                    <th class="py-2 px-4">#</th>
+                    <th class="py-2 px-4">Password</th>
+                    <th class="py-2 px-4">Name</th>
+                    <th class="py-2 px-4">Email</th>
+                    <th class="py-2 px-4">Role</th>
+                    <th class="py-2 px-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user, iterStat : ${users}" class="border-b hover:bg-gray-50">
+                    <td class="py-2 px-4" th:text="${iterStat.count}">1</td>
+
+                    <!-- Name Column -->
+                    <td class="py-2 px-4" 
+                        th:text="${user.name != null && !user.name.isEmpty()} ? ${user.name} : ${#strings.substringBefore(user.email, '@')}">
+                        Name
+                    </td>
+
+                    <!-- Email Column -->
+                    <td class="py-2 px-4" th:text="${user.email}">user@example.com</td>
+
+                    <!-- Password Column -->
+                    <td class="py-2 px-4" th:text="${user.password}">********</td>
+
+                    <!-- Role Column -->
+                    <td class="py-2 px-4" th:text="${user.role}">ROLE_USER</td>
+
+                    <!-- Actions -->
+                    <td class="py-2 px-4 space-x-2">
+                        <a th:href="@{'/user/edit/' + ${user.id}}" 
+                           class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition">Edit</a>
+                        <a th:href="@{'/user/delete/' + ${user.id}}" 
+                           class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">Delete</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script>
+    const toggleButton = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+    toggleButton.addEventListener('click', () => {
+        sidebar.classList.toggle('hidden');
+    });
+
+    // Upload Logic
+    const form = document.getElementById("uploadForm");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch("/api/notes/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                message.style.color = "green";
+                message.textContent = "✅ Note uploaded successfully!";
+                form.reset();
+            } else {
+                message.style.color = "red";
+                message.textContent = "❌ Upload failed";
+            }
+        } catch (err) {
+            message.style.color = "red";
+            message.textContent = "⚠️ Error: " + err.message;
+        }
+    });
+</script>
+</body>
+</html>

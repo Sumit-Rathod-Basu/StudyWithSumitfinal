@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Payment Successful</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="color-scheme" content="light dark">
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+
+  <!-- Container -->
+  <div class="w-full max-w-md">
+    <div class="bg-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
+
+      <!-- Confetti Canvas -->
+      <canvas id="confettiCanvas" class="absolute inset-0 pointer-events-none"></canvas>
+
+      <!-- Animated Check -->
+      <div class="w-20 h-20 mx-auto mb-4 relative">
+        <div class="absolute inset-0 rounded-full bg-green-100 animate-ping opacity-60"></div>
+        <div class="relative rounded-full bg-green-500 w-20 h-20 flex items-center justify-center shadow">
+          <!-- Checkmark -->
+          <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none">
+            <path d="M20 7L9 18l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <h1 class="text-center text-2xl font-bold text-gray-800">Payment Successful</h1>
+      <p class="text-center text-gray-500 mt-1">Thanks! Your payment has been received.</p>
+
+      <!-- Mini Receipt -->
+      <div class="mt-5 rounded-xl border bg-gray-50 p-4">
+        <div class="flex justify-between text-sm text-gray-600">
+          <span>Amount</span>
+          <span class="font-semibold text-gray-800">₹<span th:text="${amount}">0</span></span>
+        </div>
+        <div class="flex justify-between text-sm text-gray-600 mt-2">
+          <span>Transaction ID</span>
+          <span class="font-mono text-gray-800" th:text="${transactionId}">XXXXXXXX</span>
+        </div>
+        <div class="flex justify-between text-sm text-gray-600 mt-2">
+          <span>Paid by</span>
+          <span class="text-gray-800" th:text="${email}">user@example.com</span>
+        </div>
+       <div class="flex justify-between text-sm text-gray-600 mt-2">
+          <span>name</span>
+          <span class="text-gray-800" th:text="${name}">user@example.com</span>
+        </div>
+         
+        <div class="flex justify-between text-xs text-gray-500 mt-2">
+          <span>Date & Time</span>
+          <span id="successDate">--</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <a th:href="@{/user/download-receipt(transactionId=${transactionId})}"
+           class="text-center w-full px-4 py-3 rounded-xl border border-gray-300 hover:border-gray-400 transition font-medium">
+          Download Receipt
+        </a>
+        <a th:href="@{/dashboard}"
+           class="text-center w-full px-4 py-3 rounded-xl bg-green-600 text-white hover:bg-green-700 transition font-semibold">
+          Go to Dashboard
+        </a>
+      </div>
+
+      <!-- Subtext -->
+      <p class="text-[12px] text-gray-400 text-center mt-4">
+        You’ll also receive a confirmation email shortly.
+      </p>
+
+      <!-- Unmute button (shown only if autoplay blocked) -->
+      <button id="unmuteBtn"
+              class="hidden mt-4 w-full px-4 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-700 transition text-sm">
+        Tap to play success sound
+      </button>
+    </div>
+  </div>
+
+  <!-- Success Sound -->
+  <audio id="successAudio" preload="auto">
+    <!-- Place your sound file at /audio/success.mp3 -->
+    <source src="/audio/success.mp3" type="audio/mpeg"/>
+  </audio>
+
+  <script>
+    // Set date-time nicely
+    (function setNow() {
+      const el = document.getElementById('successDate');
+      try {
+        const now = new Date();
+        el.textContent = now.toLocaleString();
+      } catch {
+        el.textContent = '--';
+      }
+    })();
+
+    // Try to play success audio (may be blocked by autoplay policies)
+    (async function playSuccess() {
+      const audio = document.getElementById('successAudio');
+      const btn = document.getElementById('unmuteBtn');
+      try {
+        await audio.play();
+      } catch (e) {
+        // Show manual play button if blocked
+        btn.classList.remove('hidden');
+        btn.addEventListener('click', async () => {
+          try {
+            await audio.play();
+            btn.classList.add('hidden');
+          } catch (err) {
+            console.warn('Audio play failed:', err);
+          }
+        }, { once: true });
+      }
+    })();
+
+    // Lightweight confetti
+    (function confetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      let W, H, particles = [];
+      function resize() {
+        W = canvas.width = canvas.offsetWidth;
+        H = canvas.height = canvas.offsetHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      // Create particles
+      for (let i = 0; i < 120; i++) {
+        particles.push({
+          x: Math.random() * W,
+          y: -20 - Math.random() * H * 0.5,
+          r: 3 + Math.random() * 4,
+          d: 2 + Math.random() * 3,
+          tilt: Math.random() * 10,
+          tiltAngle: Math.random() * Math.PI,
+          rot: Math.random() * 0.1 + 0.01
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        particles.forEach(p => {
+          p.y += p.d;
+          p.tiltAngle += p.rot;
+          p.x += Math.sin(p.tiltAngle);
+          ctx.beginPath();
+          // Let browser choose default colors for simplicity
+          ctx.fillStyle = `hsl(${(p.y + p.x) % 360}, 80%, 60%)`;
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      let start = performance.now();
+      function animate(t) {
+        draw();
+        // Stop after ~2.5s to save CPU
+        if (t - start < 2500) requestAnimationFrame(animate);
+        else ctx.clearRect(0, 0, W, H);
+      }
+      requestAnimationFrame(animate);
+    })();
+  </script>
+</body>
+</html>

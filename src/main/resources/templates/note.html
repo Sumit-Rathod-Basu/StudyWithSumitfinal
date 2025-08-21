@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Dashboard - Upload Notes</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex h-screen bg-gray-100">
+
+<!-- Sidebar -->
+<aside class="bg-indigo-700 text-white w-64 flex-shrink-0 hidden md:flex flex-col transition-transform duration-300" id="sidebar">
+    <div class="p-6 text-2xl font-bold border-b border-indigo-600">
+        Admin Panel
+    </div>
+    <nav class="flex-1 p-4 space-y-3">
+        <a href="/user/admin" class="block py-2 px-4 rounded-lg hover:bg-indigo-600 transition">🏠 Dashboard</a>
+        <a href="/user/upload" class="block py-2 px-4 rounded-lg hover:bg-indigo-600 transition">📘 Manage Notes</a>
+        <a href="/user/admin/users" class="block py-2 px-4 rounded-lg hover:bg-indigo-600 transition">👤 Manage Users</a>
+        <a href="/user/admin/payments" class="block py-2 px-4 rounded-lg hover:bg-indigo-600 transition">💳 Payments</a>
+        <a href="/user/payments/list" class="block py-2 px-4 rounded-lg hover:bg-indigo-600 transition">📦 Plans</a>
+  
+    </nav>
+    <div class="p-4 border-t border-indigo-600">
+        <a href="/user/logout" class="block py-2 px-4 bg-red-500 hover:bg-red-600 rounded-lg text-center transition">
+            🚪 Logout
+        </a>
+    </div>
+</aside>
+
+<!-- Main Content -->
+<div class="flex-1 flex flex-col">
+
+    <!-- Top Navbar -->
+    <header class="bg-white shadow p-4 flex justify-between items-center md:justify-between">
+        <div class="flex items-center space-x-4">
+            <button class="md:hidden text-gray-600" id="menu-toggle">☰</button>
+            <h1 class="text-xl font-bold text-gray-700">Upload New Note 📤</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span class="text-gray-500 hidden sm:inline">admin@mynotes.com</span>
+            <img src="https://ui-avatars.com/api/?name=Admin&background=4f46e5&color=fff"
+                 alt="Admin Avatar" class="w-10 h-10 rounded-full">
+        </div>
+    </header>
+
+    <!-- Upload Form -->
+    <main class="flex-1 p-6 overflow-auto">
+        <div class="bg-white p-8 rounded-xl shadow-lg max-w-3xl mx-auto">
+            <h2 class="text-2xl font-bold text-indigo-700 text-center mb-6">Upload Note</h2>
+            <form id="uploadForm" enctype="multipart/form-data" class="space-y-5">
+                
+                <!-- Title -->
+                <div>
+                    <label for="title" class="block font-semibold text-gray-700">Title</label>
+                    <input type="text" id="title" name="title" required
+                           class="w-full p-3 border rounded-lg mt-1 focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="description" class="block font-semibold text-gray-700">Description</label>
+                    <textarea id="description" name="description" rows="3" required
+                              class="w-full p-3 border rounded-lg mt-1 focus:ring-2 focus:ring-indigo-500"></textarea>
+                </div>
+
+                <!-- Subject -->
+                <div>
+                    <label for="subject" class="block font-semibold text-gray-700">Subject</label>
+                    <input type="text" id="subject" name="subject" required
+                           class="w-full p-3 border rounded-lg mt-1 focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <!-- Is Paid -->
+                <div>
+                    <label for="isPaid" class="block font-semibold text-gray-700">Is Paid?</label>
+                    <select id="isPaid" name="isPaid" required
+                            class="w-full p-3 border rounded-lg mt-1 focus:ring-2 focus:ring-indigo-500">
+                        <option value="false">Free</option>
+                        <option value="true">Paid</option>
+                    </select>
+                </div>
+
+                <!-- Amount -->
+                <div>
+                    <label for="amount" class="block font-semibold text-gray-700">Amount</label>
+                    <input type="number" id="amount" name="amount" required
+                           class="w-full p-3 border rounded-lg mt-1 focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <!-- PDF Upload -->
+                <div>
+                    <label for="pdfFile" class="block font-semibold text-gray-700">Upload PDF</label>
+                    <input type="file" id="pdfFile" name="pdfFile" accept="application/pdf" required
+                           class="w-full p-3 border rounded-lg mt-1 bg-gray-50">
+                </div>
+
+                <!-- Thumbnail Upload -->
+                <div>
+                    <label for="imageFile" class="block font-semibold text-gray-700">Upload Thumbnail Image</label>
+                    <input type="file" id="imageFile" name="imageFile" accept="image/*" required
+                           class="w-full p-3 border rounded-lg mt-1 bg-gray-50">
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" 
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition">
+                    Upload Note
+                </button>
+
+                <!-- Message -->
+                <div class="message text-center text-sm mt-3" id="message"></div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<!-- Sidebar toggle script -->
+<script>
+    const toggleButton = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+    toggleButton.addEventListener('click', () => {
+        sidebar.classList.toggle('hidden');
+    });
+
+    // Upload Logic
+    const form = document.getElementById("uploadForm");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch("/api/notes/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                message.style.color = "green";
+                message.textContent = "✅ Note uploaded successfully!";
+                form.reset();
+            } else {
+                message.style.color = "red";
+                message.textContent = "❌ Upload failed";
+            }
+        } catch (err) {
+            message.style.color = "red";
+            message.textContent = "⚠️ Error: " + err.message;
+        }
+    });
+</script>
+</body>
+</html>

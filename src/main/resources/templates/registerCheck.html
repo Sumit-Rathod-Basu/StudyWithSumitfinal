@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Registration Successful</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+</head>
+<body class="bg-gradient-to-r from-green-100 via-blue-100 to-purple-100 min-h-screen flex items-center justify-center font-sans">
+
+<div class="bg-white shadow-2xl rounded-2xl p-10 max-w-lg text-center animate-fadeIn">
+    
+    <!-- Success Icon -->
+    <div class="flex justify-center mb-4">
+        <svg class="w-20 h-20 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+    </div>
+
+    <!-- Welcome Message -->
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">🎉 Registration Successful!</h1>
+    <p class="text-gray-600 mb-6">Welcome to <span class="font-semibold text-indigo-600">eNotes Platform</span>.<br>
+        Your account has been created successfully.</p>
+
+    <!-- Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/user/" class="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-lg">🏠 Home</a>
+        <a href="/user/login" class="px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 shadow-lg">🔑 Login</a>
+    </div>
+
+</div>
+
+<!-- Confetti Celebration -->
+<script>
+    window.onload = () => {
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+    };
+</script>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+        animation: fadeIn 0.8s ease-in-out;
+    }
+</style>
+
+</body>
+</html>

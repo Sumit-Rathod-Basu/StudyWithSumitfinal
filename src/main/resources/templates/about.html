@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Me - Sumit Rathod</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Gradient background animation */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animated-bg {
+            background: linear-gradient(270deg, #6b73ff, #000dff, #6b73ff);
+            background-size: 600% 600%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        /* Floating card effect */
+        .floating-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .floating-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        /* Typing animation */
+        .typing-text {
+            border-right: 3px solid #4f46e5;
+            white-space: nowrap;
+            overflow: hidden;
+            display: inline-block;
+            animation: typing 3s steps(30) infinite alternate;
+        }
+        @keyframes typing {
+            0% { width: 0; }
+            100% { width: 100%; }
+        }
+    </style>
+</head>
+<body class="animated-bg min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-8 max-w-3xl w-full mx-auto floating-card">
+        <!-- Profile Image -->
+        <div class="flex justify-center mb-6">
+            <img src="/images/sumit rathod.jpg" 
+                 alt="Sumit Rathod" 
+                 class="w-32 h-32 rounded-full border-4 border-indigo-500 shadow-lg"/>
+        </div>
+
+        <!-- Name and Role -->
+        <h1 class="text-4xl sm:text-5xl font-bold text-gray-800 text-center mb-2">Sumit Rathod</h1>
+        <p class="text-indigo-600 text-lg text-center mb-6 typing-text">Aspiring Computer Engineer & Passionate Coder</p>
+
+        <!-- About Section -->
+        <div class="text-gray-700 text-base sm:text-lg space-y-4 px-4">
+            <p>Hi! I’m <span class="font-semibold">Sumit Rathod</span>, currently pursuing <span class="font-semibold">Computer Engineering</span>. I am passionate about coding, problem-solving, and creating meaningful projects that can help people learn and grow.</p>
+            <p>This project was designed to provide <span class="font-semibold">students and learners</span> a platform to easily access notes, resources, and tools for their academic and coding journey.</p>
+            <p> <span class="font-medium">Motivation:</span> "Code your dreams into reality and never stop learning."</p>
+            <p> <span class="font-medium">Study Motivation:</span> "Small steps every day lead to big achievements."</p>
+        </div>
+
+        <!-- Contact / Social Buttons -->
+        <div class="mt-6 flex justify-center gap-4">
+        <!--    <a href="mailto:sumit@example.com" class="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition">Email Me</a>-->
+            <a href="https://github.com/sumitrathod" target="_blank" class="bg-gray-800 text-white px-5 py-2 rounded-lg hover:bg-gray-900 transition">GitHub</a>
+          <!-- <a href="https://linkedin.com/in/sumitrathod" target="_blank" class="bg-blue-700 text-white px-5 py-2 rounded-lg hover:bg-blue-800 transition">LinkedIn</a>-->
+        </div>
+    </div>
+
+    <!-- Optional JS animation: Floating card effect -->
+    <script>
+        const card = document.querySelector('.floating-card');
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const cx = rect.width / 2;
+            const cy = rect.height / 2;
+            const dx = (x - cx) / cx;
+            const dy = (y - cy) / cy;
+            card.style.transform = `rotateX(${-dy * 10}deg) rotateY(${dx * 10}deg)`;
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'rotateX(0) rotateY(0)';
+        });
+    </script>
+
+</body>
+</html>

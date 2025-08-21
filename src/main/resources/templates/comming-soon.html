@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coming Soon</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Animate background gradient */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animated-bg {
+            background: linear-gradient(270deg, #6b73ff, #000dff, #6b73ff);
+            background-size: 600% 600%;
+            animation: gradientBG 15s ease infinite;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex items-center justify-center animated-bg">
+
+    <div class="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-10 max-w-xl text-center mx-4">
+        <!-- Logo -->
+        <img src="/images/Screenshot_2025-08-21_153416-removebg-preview.png" alt="Logo" class="h-20 mx-auto"/>
+ 
+
+        <!-- Heading -->
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 mb-4 animate-bounce"> Coming Soon</h1>
+
+        <!-- Description -->
+        <p class="text-gray-600 mb-6 text-lg sm:text-xl">
+            We're working hard to bring you something amazing! Stay tuned for updates.
+        </p>
+
+        <!-- Countdown Timer -->
+        <div class="flex justify-center gap-4 mb-6 text-gray-800 font-semibold text-xl sm:text-2xl">
+            <div>
+                <span id="days">00</span>
+                <p class="text-sm">Days</p>
+            </div>
+            <div>
+                <span id="hours">00</span>
+                <p class="text-sm">Hours</p>
+            </div>
+            <div>
+                <span id="minutes">00</span>
+                <p class="text-sm">Minutes</p>
+            </div>
+            <div>
+                <span id="seconds">00</span>
+                <p class="text-sm">Seconds</p>
+            </div>
+        </div>
+
+        <!-- Subscribe Input -->
+        <form class="flex flex-col sm:flex-row gap-3 justify-center">
+            <input type="email" placeholder="Enter your email" class="border rounded-lg p-3 flex-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
+            <button type="submit" class="bg-indigo-600 text-white rounded-lg px-6 py-3 hover:bg-indigo-700 transition font-semibold">Notify Me</button>
+        </form>
+
+        <!-- Footer -->
+        <p class="text-gray-500 mt-6 text-sm">&copy; 2025 StudyWithSumit. All Rights Reserved.</p>
+    </div>
+
+    <!-- Countdown Script -->
+    <script>
+        const countdownDate = new Date("Dec 31, 2025 23:59:59").getTime();
+
+        const x = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = countdownDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerText = String(days).padStart(2, '0');
+            document.getElementById("hours").innerText = String(hours).padStart(2, '0');
+            document.getElementById("minutes").innerText = String(minutes).padStart(2, '0');
+            document.getElementById("seconds").innerText = String(seconds).padStart(2, '0');
+
+            if(distance < 0){
+                clearInterval(x);
+                document.querySelector("h1").innerText = "🎉 We're Live!";
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

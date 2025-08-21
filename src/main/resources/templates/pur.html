@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>My Purchased Notes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #f8fafc;
+            --accent: #f1f5f9;
+            --text: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+        
+        .header-shadow {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .pdf-container {
+            width: 100%;
+            height: calc(100vh - 180px);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .pdf-toolbar {
+            background: var(--primary);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .pdf-viewer {
+            flex: 1;
+            border: none;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .note-sidebar {
+            height: calc(100vh - 180px);
+            overflow-y: auto;
+            padding: 8px;
+            background: var(--accent);
+            border-radius: 12px;
+        }
+        
+        .note-item {
+            transition: all 0.2s ease;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        
+        .note-item:hover, .note-item.active {
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-color: var(--primary);
+        }
+        
+        .note-item.active {
+            transform: scale(1.02);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .tag-free {
+            background: #10b981;
+            color: white;
+        }
+        
+        .tag-paid {
+            background: #ef4444;
+            color: white;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Animation for panel switching */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .pdf-container {
+                height: 400px;
+            }
+            
+            .note-sidebar {
+                height: auto;
+                max-height: 300px;
+            }
+        }
+        
+        /* Loading animation for PDF */
+        .pdf-loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            background: #f8fafc;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Hide download and print icons */
+        .pdf-toolbar button[title="Download"],
+        .pdf-toolbar button[title="Print"] {
+            display: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<header class="bg-white header-shadow sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto flex items-center justify-between p-4 md:p-5">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-100 p-2 rounded-lg">
+                <i class="fas fa-book-open text-indigo-600 text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">My Purchased Notes</h1>
+        </div>
+        <button id="view-toggle" class="btn btn-outline hidden md:flex">
+            <i class="fas fa-th"></i> Grid View
+        </button>
+    </div>
+</header>
+
+<main class="flex-1 max-w-7xl mx-auto w-full p-4 md:p-5 mt-2">
+    <!-- Two-panel View (default on larger screens) -->
+    <section id="notes-two-panel" class="fade-in flex flex-col md:flex-row gap-5">
+        <!-- Left Panel: Sidebar with all notes -->
+        <div class="md:w-1/3 lg:w-1/4 note-sidebar">
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="font-semibold text-gray-700">My Notes</h2>
+                <span class="text-sm text-gray-500" th:text="${notes.size() + ' items'}">5 items</span>
+            </div>
+            
+            <div class="space-y-3">
+                <div th:each="note,iterStat : ${notes}" 
+                     class="note-item p-3 card cursor-pointer"
+                     th:attr="data-download-url=${note.downloadUrl}, data-note-id=${iterStat.index}"
+                     onclick="selectNote(this, true)">
+                    <div class="flex gap-3">
+                        <img th:src="@{'/uploads/' + ${note.previewUrl.substring(note.previewUrl.lastIndexOf('/') + 1)}}" 
+                             class="w-16 h-16 object-cover rounded-lg" 
+                             alt="Note thumbnail">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-gray-800 truncate" th:text="${note.title}">Note Title</h3>
+                            <p class="text-sm text-gray-500 mb-1" th:text="${note.subject}">Subject</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-medium text-gray-700" th:text="'$' + ${note.amount}">$12.99</span>
+                                <span th:classappend="${note.isPaid} ? 'tag-paid' : 'tag-free'" 
+                                      class="tag text-xs"
+                                      th:text="${note.isPaid} ? 'Paid' : 'Free'">Free</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: PDF Preview -->
+        <div class="md:w-2/3 lg:w-3/4">
+            <div class="pdf-container">
+                <div class="pdf-toolbar">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-file-pdf"></i>
+                        <span id="current-note-title" class="font-medium">Select a note to preview</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="bg-white text-indigo-600 p-2 rounded-lg hover:bg-indigo-50" title="Download">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="bg-white text-indigo-600 p-2 rounded-lg hover:bg-indigo-50" title="Print">
+                            <i class="fas fa-print"></i>
+                        </button>
+                        <button class="bg-white text-indigo-600 p-2 rounded-lg hover:bg-indigo-50 md:hidden" 
+                                onclick="toggleSidebar()" title="Show Notes List">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="pdf-placeholder" class="flex flex-col items-center justify-center h-full p-8 text-center">
+                    <div class="bg-indigo-100 p-5 rounded-full mb-5">
+                        <i class="fas fa-file-pdf text-indigo-500 text-4xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">PDF Preview</h3>
+                    <p class="text-gray-500 max-w-md">Select a note from the sidebar to view its content here. You can zoom, scroll and navigate through the document.</p>
+                </div>
+                
+                <div id="pdf-loading" class="pdf-loading hidden">
+                    <div class="spinner"></div>
+                </div>
+                
+                <iframe id="pdf-frame" class="pdf-viewer hidden" 
+                        frameborder="0" 
+                        allowfullscreen>
+                </iframe>
+            </div>
+            
+            <div class="mt-4 flex justify-between items-center">
+                <button id="prev-note" class="btn btn-outline" disabled>
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                
+                <div class="flex gap-2">
+                    <button class="btn btn-outline" onclick="zoomPdf(0.8)">
+                        <i class="fas fa-search-minus"></i> Zoom Out
+                    </button>
+                    <button class="btn btn-outline" onclick="zoomPdf(1.2)">
+                        <i class="fas fa-search-plus"></i> Zoom In
+                    </button>
+                </div>
+                
+                <button id="next-note" class="btn btn-outline" disabled>
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Grid View (hidden by default) -->
+    <section id="notes-grid" class="hidden fade-in">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold text-gray-800">All Notes</h2>
+            <button id="grid-view-toggle" class="btn btn-outline">
+                <i class="fas fa-columns"></i> Panel View
+            </button>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div th:each="note,iterStat : ${notes}" class="card overflow-hidden">
+                <div class="relative">
+                    <img th:src="@{'/uploads/' + ${note.previewUrl.substring(note.previewUrl.lastIndexOf('/') + 1)}}" 
+                         class="w-full h-48 object-cover" 
+                         alt="Note thumbnail">
+                    <div class="absolute top-3 right-3">
+                        <span th:classappend="${note.isPaid} ? 'tag-paid' : 'tag-free'" 
+                              class="tag"
+                              th:text="${note.isPaid} ? 'Paid' : 'Free'">Free</span>
+                    </div>
+                </div>
+                
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2" th:text="${note.title}">Note Title</h3>
+                    <p class="text-gray-500 text-sm mb-3 line-clamp-2" th:text="${note.description}">Note description goes here and it can be somewhat longer than the title...</p>
+                    
+                    <div class="flex justify-between text-sm mb-4">
+                        <span class="text-gray-600"><i class="fas fa-book text-indigo-500 mr-1"></i> <span th:text="${note.subject}">Mathematics</span></span>
+                        <span class="text-gray-800 font-semibold" th:text="'$' + ${note.amount}">$12.99</span>
+                    </div>
+                    
+                    <button type="button"
+                            class="btn btn-primary w-full"
+                            th:attr="data-note-id=${iterStat.index}, data-download-url=${note.downloadUrl}"
+                            onclick="selectNote(this, false)">
+                        <i class="far fa-eye"></i> Preview PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="bg-white header-shadow mt-10">
+    <div class="max-w-7xl mx-auto p-6 text-gray-600 text-sm text-center">
+        © 2025 MyNotes. All rights reserved.
+    </div>
+</footer>
+
+<script>
+    // Current note index for navigation
+    let currentNoteIndex = 0;
+    let totalNotes = 0;
+    let currentZoom = 1;
+    
+    // Initialize after DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        totalNotes = document.querySelectorAll('.note-item').length;
+        setupEventListeners();
+    });
+    
+    function setupEventListeners() {
+        // View toggle functionality
+        document.getElementById('view-toggle').addEventListener('click', function() {
+            toggleView();
+        });
+        
+        document.getElementById('grid-view-toggle').addEventListener('click', function() {
+            toggleView();
+        });
+        
+        // Next/previous note navigation
+        document.getElementById('next-note').addEventListener('click', function() {
+            navigateNotes(1);
+        });
+        
+        document.getElementById('prev-note').addEventListener('click', function() {
+            navigateNotes(-1);
+        });
+    }
+    
+    function toggleView() {
+        const twoPanelView = document.getElementById('notes-two-panel');
+        const gridView = document.getElementById('notes-grid');
+        const viewToggle = document.getElementById('view-toggle');
+        
+        if (twoPanelView.classList.contains('hidden')) {
+            // Switch to two-panel view
+            twoPanelView.classList.remove('hidden');
+            gridView.classList.add('hidden');
+            viewToggle.innerHTML = '<i class="fas fa-th"></i> Grid View';
+        } else {
+            // Switch to grid view
+            twoPanelView.classList.add('hidden');
+            gridView.classList.remove('hidden');
+            viewToggle.innerHTML = '<i class="fas fa-columns"></i> Panel View';
+        }
+    }
+    
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.note-sidebar');
+        sidebar.classList.toggle('hidden');
+        sidebar.classList.toggle('md:block');
+    }
+    
+    function selectNote(element, isFromSidebar) {
+        let noteId, downloadUrl, noteTitle;
+        
+        if (isFromSidebar) {
+            // Coming from sidebar item
+            noteId = element.getAttribute('data-note-id');
+            downloadUrl = element.getAttribute('data-download-url');
+            noteTitle = element.querySelector('h3').textContent;
+            
+            // Update active state
+            document.querySelectorAll('.note-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
+            
+            // Switch to two-panel view if in grid view on mobile
+            if (window.innerWidth < 768) {
+                const twoPanelView = document.getElementById('notes-two-panel');
+                const gridView = document.getElementById('notes-grid');
+                
+                if (!twoPanelView.classList.contains('hidden')) {
+                    // Already in two-panel view, just select the note
+                    loadPdf(noteId, downloadUrl, noteTitle);
+                } else {
+                    // Switch to two-panel view
+                    twoPanelView.classList.remove('hidden');
+                    gridView.classList.add('hidden');
+                    
+                    // Small delay to allow for rendering before loading PDF
+                    setTimeout(() => {
+                        loadPdf(noteId, downloadUrl, noteTitle);
+                    }, 100);
+                }
+            } else {
+                loadPdf(noteId, downloadUrl, noteTitle);
+            }
+        } else {
+            // Coming from grid view button
+            noteId = element.getAttribute('data-note-id');
+            downloadUrl = element.getAttribute('data-download-url');
+            noteTitle = element.closest('.card').querySelector('h3').textContent;
+            
+            // Switch to two-panel view
+            const twoPanelView = document.getElementById('notes-two-panel');
+            const gridView = document.getElementById('notes-grid');
+            
+            twoPanelView.classList.remove('hidden');
+            gridView.classList.add('hidden');
+            
+            // Update active state in sidebar
+            document.querySelectorAll('.note-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-note-id') === noteId) {
+                    item.classList.add('active');
+                    // Scroll into view
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+            
+            // Load the PDF
+            loadPdf(noteId, downloadUrl, noteTitle);
+        }
+        
+        // Update current note index
+        currentNoteIndex = parseInt(noteId);
+        updateNavigationButtons();
+    }
+    
+  /*   function loadPdf(noteId, downloadUrl, noteTitle) {
+        // Show loading state
+        document.getElementById('pdf-placeholder').classList.add('hidden');
+        document.getElementById('pdf-frame').classList.add('hidden');
+        document.getElementById('pdf-loading').classList.remove('hidden');
+        
+        // Update current note title
+        document.getElementById('current-note-title').textContent = noteTitle;
+        
+        // Load the PDF after a short delay to show loading animation
+        setTimeout(() => {
+            const frame = document.getElementById('pdf-frame');
+            frame.src = '/uploads/' + downloadUrl + '#toolbar=1&navpanes=1&scrollbar=1&zoom=' + (currentZoom * 100) + '&view=FitH';
+            
+            // When PDF is loaded, show it and hide loading
+            frame.onload = function() {
+                document.getElementById('pdf-loading').classList.add('hidden');
+                frame.classList.remove('hidden');
+            };
+        }, 800);
+    }
+     */
+function loadPdf(noteId, downloadUrl, noteTitle) {
+    const pdfPlaceholder = document.getElementById('pdf-placeholder');
+    const pdfFrame = document.getElementById('pdf-frame');
+    const pdfLoading = document.getElementById('pdf-loading');
+
+    // Show loading animation
+    pdfPlaceholder.classList.add('hidden');
+    pdfFrame.classList.add('hidden');
+    pdfLoading.classList.remove('hidden');
+
+    // Update current note title
+    document.getElementById('current-note-title').textContent = noteTitle;
+
+    // Small delay to show loading animation
+    setTimeout(() => {
+        // Set iframe size dynamically (fit container)
+        pdfFrame.style.width = "100%";
+        pdfFrame.style.height = "calc(100vh - 180px)"; // adjust height as needed
+
+        // Load PDF in browser's PDF viewer (toolbar hidden)
+        pdfFrame.src = '/uploads/' + downloadUrl + '#toolbar=0&zoom=' + (currentZoom * 100);
+
+        // When PDF loads, hide loading spinner
+        pdfFrame.onload = function() {
+            pdfLoading.classList.add('hidden');
+            pdfFrame.classList.remove('hidden');
+        };
+    }, 500); // 0.5s delay for loading animation
+}
+
+
+
+
+    function navigateNotes(direction) {
+        const newIndex = currentNoteIndex + direction;
+        
+        if (newIndex >= 0 && newIndex < totalNotes) {
+            const noteItems = document.querySelectorAll('.note-item');
+            const targetNote = noteItems[newIndex];
+            
+            // Select the new note
+            selectNote(targetNote, true);
+            
+            // Scroll into view in the sidebar
+            targetNote.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+    
+    function updateNavigationButtons() {
+        document.getElementById('prev-note').disabled = currentNoteIndex <= 0;
+        document.getElementById('next-note').disabled = currentNoteIndex >= totalNotes - 1;
+    }
+    
+    function zoomPdf(factor) {
+        currentZoom *= factor;
+        
+        const frame = document.getElementById('pdf-frame');
+        if (frame.src) {
+            // Reload the iframe with new zoom level
+            const currentSrc = frame.src.split('&zoom=')[0];
+            frame.src = currentSrc + '&zoom=' + (currentZoom * 100);
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${note.title} + ' - Payment Details'">Payment Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+<!-- Header -->
+<header class="bg-white shadow">
+    <div class="max-w-7xl mx-auto flex items-center justify-between p-4">
+        <div class="flex items-center gap-3">
+            <img src="/images/logo.png" alt="Logo" class="h-10"/>
+            <span class="text-xl font-bold text-blue-600">MyNotes</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <a href="#" class="text-gray-600 hover:text-blue-600">Log In</a>
+            <a href="#" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Sign Up</a>
+            <a href="#" class="relative text-gray-600 hover:text-blue-600">
+                Cart
+                <span class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">0</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto p-4 mt-6">
+    <section class="bg-white rounded-2xl shadow-xl p-8 border border-gray-200 flex flex-col md:flex-row gap-8">
+        
+        <!-- Left Panel: Note Info + Actions -->
+        <div class="md:w-1/2 flex flex-col gap-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4 border-b pb-2">📝 Note Details</h1>
+
+            <div class="flex flex-col gap-3 text-gray-700">
+                <p><span class="font-semibold text-gray-900">Note ID:</span> <span th:text="${note.id}">123</span></p>
+                <p><span class="font-semibold text-gray-900">Title:</span> <span th:text="${note.title}">Title</span></p>
+                <p><span class="font-semibold text-gray-900">Name:</span> <span th:text="${payment.name}">Name</span></p>
+                <p><span class="font-semibold text-gray-900">Email:</span> <span th:text="${payment.email}">Email</span></p>
+                <p><span class="font-semibold text-gray-900">Amount:</span> ₹<span th:text="${payment.amount}">0.0</span></p>
+                <p><span class="font-semibold text-gray-900">Transaction ID:</span> <span th:text="${payment.transactionId}">0.0</span></p>
+                <p>
+                    <span class="font-semibold text-gray-900">Status:</span>
+                    <span th:classappend="${payment.status == 'APPROVED' ? 'text-green-600 font-semibold' :
+                                           payment.status == 'REJECTED' ? 'text-red-600 font-semibold' : 
+                                           'text-yellow-600 font-semibold'}"
+                          th:text="${payment.status}">Pending</span>
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4 mt-6">
+                <!-- Approve -->
+                <form th:action="@{/user/approve}" method="post" class="flex-1">
+                    <input type="hidden" name="id" th:value="${payment.noteId}" />
+                    <input type="hidden" name="email" th:value="${payment.email}" />
+                    <button type="submit" class="w-full bg-green-500 text-white px-6 py-3 rounded hover:bg-green-700 transition-colors">
+                        Approve
+                    </button>
+                </form>
+
+                <!-- Reject -->
+                <form th:action="@{/user/reject}" method="post" class="flex-1">
+                    <input type="hidden" name="id" th:value="${payment.noteId}" />
+                    <input type="hidden" name="email" th:value="${payment.email}" />
+                    <button type="submit" class="w-full bg-red-500 text-white px-6 py-3 rounded hover:bg-red-700 transition-colors">
+                        Reject
+                    </button>
+                </form>
+
+                <!-- Delete -->
+                <form th:action="@{/user/delete}" method="post" class="flex-1"
+                      onsubmit="return confirm('Are you sure you want to delete this note?');">
+                    <input type="hidden" name="id" th:value="${payment.id}" />
+                    <button type="submit" class="bg-gray-600 text-white px-6 py-3 rounded hover:bg-gray-700 transition-colors">
+                        🗑 Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right Panel: PDF + Images -->
+        <div class="md:w-1/2 flex flex-col gap-6">
+            <!-- PDF Preview -->
+            <div>
+                <h2 class="text-2xl font-semibold mb-3 text-indigo-700">PDF Preview</h2>
+                <iframe th:src="@{'/uploads/' + ${note.downloadUrl}}"
+                        class="w-full h-96 border rounded-2xl shadow-lg"></iframe>
+            </div>
+
+            <!-- Image Previews -->
+            <div>
+                <h2 class="text-2xl font-semibold mb-1 text-indigo-700">Image Previews</h2>
+                <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
+                    <img th:each="img : ${note.previewUrl}"
+                         th:src="@{'/uploads/' + ${img}}"
+                         alt="Note Image"
+                         class="w-full h-90 object-cover rounded-2xl shadow-lg hover:scale-105 transition-transform duration-300"/>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</main>
+
+<!-- Footer -->
+<footer class="bg-white shadow mt-10">
+    <div class="max-w-7xl mx-auto p-6 flex flex-col md:flex-row justify-between items-center text-gray-600 text-sm">
+        <p>© 2025 MyNotes. All rights reserved.</p>
+        <div class="flex gap-4 mt-2 md:mt-0">
+            <a href="#" class="hover:text-blue-600">Privacy Policy</a>
+            <a href="#" class="hover:text-blue-600">Terms of Service</a>
+            <a href="#" class="hover:text-blue-600">Support</a>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

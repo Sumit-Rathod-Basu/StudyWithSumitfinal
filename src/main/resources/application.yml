@@ -1,0 +1,91 @@
+# File upload configuration
+
+
+# Spring servlet multipart configuration
+
+server:
+  port: 8090
+
+spring:
+  # -------------------------
+  # Database (Choose MySQL OR H2)
+  # -------------------------
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/enote?useSSL=false&serverTimezone=UTC
+    username: root
+    password: admin   # 🔹 Change to your MySQL password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  h2:
+    console:
+      enabled: true
+      path: /h  
+  autoconfigure:
+    exclude: 
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration    
+     
+  servlet:
+   multipart:
+    max-file-size: 20MB
+    max-request-size: 20MB
+    location: uploads 
+  jpa:
+    hibernate:
+      ddl-auto: update     # update schema automatically
+    show-sql: true
+ 
+   # temporary upload location
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+    enabled: true   # ✅ Enable thymeleaf
+    check-template-location: true
+  web:
+    resources:
+      static-locations: classpath:/static/,file:uploads/  
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: sumitrathod1405@gmail.com     # <-- your Gmail
+    password: ylho nvaz uczp vkty      # <-- the 16-char App Password (paste it; spaces OK)
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: smtp.gmail.com
+file:
+  upload-dir: uploads
+
+
+  # -------------------------
+  # H2 (for development/testing only)
+  # -------------------------
+
+
+  # -------------------------
+  # Thymeleaf
+  # -------------------------
+
+
+  # -------------------------
+  # Mail
+  # -------------------------
+
+  
+
+
+
+
+# -------------------------
+# Application Custom Settings
+# -------------------------
+
+
+
+
+# Avoid temp folder issues
+
