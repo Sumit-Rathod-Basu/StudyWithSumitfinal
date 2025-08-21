@@ -31,7 +31,8 @@ spring:
     location: uploads 
   jpa:
     hibernate:
-      ddl-auto: update     # update schema automatically
+      ddl-auto: update  
+    database-platform: org.hibernate.dialect.MySQL8Dialect   # update schema automatically
     show-sql: true
  
    # temporary upload location
