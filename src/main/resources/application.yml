@@ -10,12 +10,16 @@ spring:
   # -------------------------
   # Database (Choose MySQL OR H2)
   # -------------------------
+  application:
+    name: StudywithSumit
+  profiles:
+    active: dev
 
   datasource:
-    url: jdbc:mysql://host.docker.internal:3306/enote?useSSL=false&serverTimezone=UTC
-    username: root
-    password: admin   # 🔹 Change to your MySQL password
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:postgresql://dpg-d2k4vmm3jp1c73fqnegg-a.oregon-postgres.render.com:5432/enote_iby2
+    username: enote_iby2_user
+    password: FUJb8oYFbnckgom4uYKFqValzACpbRhp
+    driver-class-name: org.postgresql.Driver
   h2:
     console:
       enabled: true
@@ -32,7 +36,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update  
-    database-platform: org.hibernate.dialect.MySQL8Dialect   # update schema automatically
+    database-platform: org.hibernate.dialect.PostgreSQLDialect   # update schema automatically
     show-sql: true
  
    # temporary upload location
@@ -89,4 +93,3 @@ file:
 
 
 # Avoid temp folder issues
-
