@@ -253,7 +253,8 @@
                      th:attr="data-download-url=${note.downloadUrl}, data-note-id=${iterStat.index}"
                      onclick="selectNote(this, true)">
                     <div class="flex gap-3">
-                        <img th:src="@{'/uploads/' + ${note.previewUrl.substring(note.previewUrl.lastIndexOf('/') + 1)}}" 
+                        <img th:src="${note.previewUrl}" 
+
                              class="w-16 h-16 object-cover rounded-lg" 
                              alt="Note thumbnail">
                         <div class="flex-1 min-w-0">
@@ -344,7 +345,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <div th:each="note,iterStat : ${notes}" class="card overflow-hidden">
                 <div class="relative">
-                    <img th:src="@{'/uploads/' + ${note.previewUrl.substring(note.previewUrl.lastIndexOf('/') + 1)}}" 
+                    <img th:src="${note.previewUrl}" 
                          class="w-full h-48 object-cover" 
                          alt="Note thumbnail">
                     <div class="absolute top-3 right-3">
@@ -547,7 +548,7 @@ function loadPdf(noteId, downloadUrl, noteTitle) {
         pdfFrame.style.height = "calc(100vh - 180px)"; // adjust height as needed
 
         // Load PDF in browser's PDF viewer (toolbar hidden)
-        pdfFrame.src = '/uploads/' + downloadUrl + '#toolbar=0&zoom=' + (currentZoom * 100);
+      pdfFrame.src = downloadUrl + '#toolbar=0&zoom=' + (currentZoom * 100);
 
         // When PDF loads, hide loading spinner
         pdfFrame.onload = function() {

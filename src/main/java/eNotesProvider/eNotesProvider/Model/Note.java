@@ -22,11 +22,11 @@ public class Note {
     private boolean isPaid;
       private Long amount;
   //  private String previewUrl;     // URL to show thumbnail in frontend
-   // private String downloadUrl;
-    @Column(columnDefinition = "TEXT")
+  //  private String downloadUrl;
+     @Column(columnDefinition = "TEXT")
 private String previewUrl;
 
 @Column(columnDefinition = "TEXT")
 private String downloadUrl;
-
+ 
 }

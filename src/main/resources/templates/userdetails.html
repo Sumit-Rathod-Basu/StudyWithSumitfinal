@@ -86,19 +86,20 @@
             <!-- PDF Preview -->
             <div>
                 <h2 class="text-2xl font-semibold mb-3 text-indigo-700">PDF Preview</h2>
-                <iframe th:src="@{'/uploads/' + ${note.downloadUrl}}"
+                <iframe th:src="${note.downloadUrl}"
                         class="w-full h-96 border rounded-2xl shadow-lg"></iframe>
             </div>
+            
 
             <!-- Image Previews -->
             <div>
                 <h2 class="text-2xl font-semibold mb-1 text-indigo-700">Image Previews</h2>
                 <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
-                    <img th:each="img : ${note.previewUrl}"
-                         th:src="@{'/uploads/' + ${img}}"
-                         alt="Note Image"
-                         class="w-full h-90 object-cover rounded-2xl shadow-lg hover:scale-105 transition-transform duration-300"/>
+               <img th:src="${note.previewUrl}" 
+                 class="w-full h-90 object-cover rounded-2xl shadow-lg hover:scale-105 transition-transform duration-300" alt="Note Image"/>
                 </div>
+                 
+            <div>
             </div>
         </div>
 

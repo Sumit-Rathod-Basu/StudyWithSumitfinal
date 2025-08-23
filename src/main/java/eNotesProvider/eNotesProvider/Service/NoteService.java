@@ -1,5 +1,6 @@
 package eNotesProvider.eNotesProvider.Service;
 
+import eNotesProvider.eNotesProvider.Controller.CloudinaryConfig;
 import eNotesProvider.eNotesProvider.Dto.NoteDto;
 import eNotesProvider.eNotesProvider.Dto.PurchesedDto;
 import eNotesProvider.eNotesProvider.Mapper.NoteConversion;
@@ -15,17 +16,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 @Service
 public class NoteService {
 
     private static final String UPLOAD_DIR = "src/main/resources/static/uploads/";
+
+    private Cloudinary cloudinary;
 
     @Autowired
     private NoteRepo noteRepository;
@@ -38,38 +46,69 @@ public class NoteService {
    
     @Autowired
     private paymentsRepo paymentsRepoposuitory;
-  public NoteDto saveNote(NoteDto dto, MultipartFile pdfFile, MultipartFile imageFile) throws IOException {
-    // Create upload directory if not exists
-    File dir = new File(UPLOAD_DIR);
-    if (!dir.exists()) dir.mkdirs();
 
-    String pdfFileName = null;
-    String imageFileName = null;
-
-    // Save PDF
-    if (pdfFile != null && !pdfFile.isEmpty()) {
-        pdfFileName = System.currentTimeMillis() + "_" + pdfFile.getOriginalFilename();
-        Path pdfPath = Paths.get(UPLOAD_DIR + pdfFileName);
-        Files.copy(pdfFile.getInputStream(), pdfPath, StandardCopyOption.REPLACE_EXISTING);
+  @Autowired
+    public NoteService(Cloudinary cloudinary,
+                       NoteRepo noteRepository,
+                       NoteConversion noteConversion) {
+        this.cloudinary = cloudinary;
+        this.noteRepository = noteRepository;
+        this.noteConversion = noteConversion;
     }
 
-    // Save Image
-    if (imageFile != null && !imageFile.isEmpty()) {
-        imageFileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
-        Path imagePath = Paths.get(UPLOAD_DIR + imageFileName);
-        Files.copy(imageFile.getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
-    }
+    public NoteDto saveNote(NoteDto dto, MultipartFile pdfFile, MultipartFile imageFile) throws IOException {
 
-    // Map DTO → Entity
-    Note note = noteConversion.toNote(dto);
-    note.setDownloadUrl(pdfFileName);    // store only file name
-    note.setPreviewUrl(imageFileName);   // store only file name
+        String pdfUrl = null;
+        String imageUrl = null;
 
-    // Save in DB
-    Note saved = noteRepository.save(note);
+        // Generate a unique ID for file naming
+        String uniqueId = UUID.randomUUID().toString();
 
-    return noteConversion.toNoteDto(saved);
+ if (pdfFile != null && !pdfFile.isEmpty()) {
+
+String originalFilename = pdfFile.getOriginalFilename();  // e.g. "mydocument.pdf"
+String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+String publicId = UUID.randomUUID().toString() + "-note" + extension;
+
+Map uploadResult = cloudinary.uploader().upload(
+    pdfFile.getBytes(),
+    ObjectUtils.asMap(
+        "folder", "notes",
+        "resource_type", "raw",
+        "public_id", publicId
+    )
+);
+
+pdfUrl = uploadResult.get("secure_url").toString();
+
 }
+
+
+        // Upload Image (auto resource type)
+        if (imageFile != null && !imageFile.isEmpty()) {
+            Map uploadResult = cloudinary.uploader().upload(
+                    imageFile.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", "notes",
+                            "resource_type", "auto",
+                            "public_id", uniqueId + "-preview"
+                    )
+            );
+            imageUrl = uploadResult.get("secure_url").toString();
+        }
+
+        // Convert DTO to entity and set URLs
+        Note note = noteConversion.toNote(dto);
+        note.setDownloadUrl(pdfUrl);
+        note.setPreviewUrl(imageUrl);
+
+        // Save entity to database
+        Note savedNote = noteRepository.save(note);
+
+        System.out.println("Note saved with ID: " + savedNote.getId());
+
+        return noteConversion.toNoteDto(savedNote);
+    }
 
      public List<NoteDto> getAllNotes() {
         List<Note> notes = noteRepository.findAll(); // fetch all notes from DB

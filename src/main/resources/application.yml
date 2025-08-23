@@ -7,6 +7,7 @@ server:
   port: 8090
 
 spring:
+
   # -------------------------
   # Database (Choose MySQL OR H2)
   # -------------------------
@@ -27,7 +28,8 @@ spring:
   autoconfigure:
     exclude: 
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration    
-     
+
+   
   servlet:
    multipart:
     max-file-size: 20MB
