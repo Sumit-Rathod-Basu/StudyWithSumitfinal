@@ -6,28 +6,28 @@
   <title>Payment Successful</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <meta name="color-scheme" content="light dark">
+  <!-- html2pdf for download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- QR Code library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
 
   <!-- Container -->
   <div class="w-full max-w-md">
     <div class="bg-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
-
-      <!-- Confetti Canvas -->
       <canvas id="confettiCanvas" class="absolute inset-0 pointer-events-none"></canvas>
 
       <!-- Animated Check -->
       <div class="w-20 h-20 mx-auto mb-4 relative">
         <div class="absolute inset-0 rounded-full bg-green-100 animate-ping opacity-60"></div>
         <div class="relative rounded-full bg-green-500 w-20 h-20 flex items-center justify-center shadow">
-          <!-- Checkmark -->
           <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none">
             <path d="M20 7L9 18l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
       </div>
 
-      <!-- Title -->
       <h1 class="text-center text-2xl font-bold text-gray-800">Payment Successful</h1>
       <p class="text-center text-gray-500 mt-1">Thanks! Your payment has been received.</p>
 
@@ -45,11 +45,10 @@
           <span>Paid by</span>
           <span class="text-gray-800" th:text="${email}">user@example.com</span>
         </div>
-       <div class="flex justify-between text-sm text-gray-600 mt-2">
-          <span>name</span>
-          <span class="text-gray-800" th:text="${name}">user@example.com</span>
+        <div class="flex justify-between text-sm text-gray-600 mt-2">
+          <span>Name</span>
+          <span class="text-gray-800" th:text="${name}">Sumit Rathod</span>
         </div>
-         
         <div class="flex justify-between text-xs text-gray-500 mt-2">
           <span>Date & Time</span>
           <span id="successDate">--</span>
@@ -58,110 +57,243 @@
 
       <!-- Actions -->
       <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <a th:href="@{/user/download-receipt(transactionId=${transactionId})}"
-           class="text-center w-full px-4 py-3 rounded-xl border border-gray-300 hover:border-gray-400 transition font-medium">
-          Download Receipt
-        </a>
-        <a th:href="@{/dashboard}"
+        <button id="viewBtn"
+                class="text-center w-full px-4 py-3 rounded-xl border border-gray-300 hover:border-gray-400 transition font-medium">
+          View Receipt
+        </button>
+        <a th:href="@{/user/}"
            class="text-center w-full px-4 py-3 rounded-xl bg-green-600 text-white hover:bg-green-700 transition font-semibold">
-          Go to Dashboard
+          Go to homepage
         </a>
       </div>
 
-      <!-- Subtext -->
       <p class="text-[12px] text-gray-400 text-center mt-4">
-        You’ll also receive a confirmation email shortly.
+        You'll also receive a confirmation email shortly.
+          this is a partialy confermation receipt of payments & final confiramation are send to your regeterd email id.
       </p>
-
-      <!-- Unmute button (shown only if autoplay blocked) -->
-      <button id="unmuteBtn"
-              class="hidden mt-4 w-full px-4 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-700 transition text-sm">
-        Tap to play success sound
-      </button>
     </div>
   </div>
 
-  <!-- Success Sound -->
-  <audio id="successAudio" preload="auto">
-    <!-- Place your sound file at /audio/success.mp3 -->
-    <source src="/audio/success.mp3" type="audio/mpeg"/>
-  </audio>
+  <!-- Receipt Modal -->
+  <div id="receiptModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 relative overflow-y-auto max-h-screen">
+
+      <!-- Receipt Content -->
+      <div id="receiptContent" style="border: 4px solid #333; border-radius: 8px; padding: 20px; background-color: #fff; position: relative;">     
+
+        <!-- Watermark -->
+        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); opacity:0.15; z-index:0; pointer-events:none;">
+          <img id="watermarkImg" src="/images/Screenshot_2025-08-21_153416-removebg-preview.png"
+               alt="Watermark" style="width:400px; height:auto;" onerror="this.style.display='none'">
+        </div>
+
+        <!-- Foreground Content -->
+        <div style="position:relative; z-index:1;">
+          <!-- Logo -->
+          <div class="text-center mb-4">
+            <img id="logoImg" src="/images/Screenshot_2025-08-21_153416-removebg-preview.png"
+                 alt="Logo" class="mx-auto w-24" style="opacity:1;" onerror="this.style.display='none'"/>
+            <h2 class="text-xl font-bold">Study With Sumit</h2>
+            <p class="text-gray-500 text-sm">Professional Payment Receipt</p>
+          </div>
+
+          <!-- Table -->
+          <table class="w-full text-sm border-collapse mb-4">
+            <tr><td class="font-semibold p-1 border-b border-gray-300">Transaction ID</td><td class="p-1 border-b border-gray-300" th:text="${transactionId}">XXXXXXXX</td></tr>
+            <tr><td class="font-semibold p-1 border-b border-gray-300">Name</td><td class="p-1 border-b border-gray-300" th:text="${name}">Sumit Rathod</td></tr>
+            <tr><td class="font-semibold p-1 border-b border-gray-300">Email</td><td class="p-1 border-b border-gray-300" th:text="${email}">user@example.com</td></tr>
+            <tr><td class="font-semibold p-1 border-b border-gray-300">Amount</td><td class="p-1 border-b border-gray-300">₹<span th:text="${amount}">0</span></td></tr>
+            <tr><td class="font-semibold p-1">Date</td><td class="p-1" id="modalDate">--</td></tr>
+          </table>
+
+          <!-- QR Code and Signature -->
+          <div class="flex justify-between items-start mt-8">
+            <!-- QR Code -->
+            <div>
+              <div id="qrcode" class="mb-2"></div>
+              <p class="text-sm text-center">     -          </p>
+            </div>
+            
+            <!-- Signature -->
+            <div class="text-right">
+              <img id="signatureImg" src="/images/sig.png" alt="Signature" class="w-32 mx-auto" onerror="this.style.display='none'"/>
+              <p class="text-sm">Authorized Signature</p>
+            
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Actions -->
+      <div class="mt-4 flex justify-between">
+        <button id="downloadBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Download PDF</button>
+        <button id="closeBtn" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Close</button>
+      </div>
+    </div>
+  </div>
 
   <script>
-    // Set date-time nicely
+    // Set date-time
     (function setNow() {
       const el = document.getElementById('successDate');
-      try {
-        const now = new Date();
-        el.textContent = now.toLocaleString();
-      } catch {
-        el.textContent = '--';
-      }
+      const modalDate = document.getElementById('modalDate');
+      const now = new Date().toLocaleString();
+      if (el) el.textContent = now;
+      if (modalDate) modalDate.textContent = now;
     })();
 
-    // Try to play success audio (may be blocked by autoplay policies)
-    (async function playSuccess() {
-      const audio = document.getElementById('successAudio');
-      const btn = document.getElementById('unmuteBtn');
-      try {
-        await audio.play();
-      } catch (e) {
-        // Show manual play button if blocked
-        btn.classList.remove('hidden');
-        btn.addEventListener('click', async () => {
-          try {
-            await audio.play();
-            btn.classList.add('hidden');
-          } catch (err) {
-            console.warn('Audio play failed:', err);
+    // Get Thymeleaf variables
+    const transactionId = /*[[${transactionId}]]*/ 'XXXXXXXX';
+    const name = /*[[${name}]]*/ 'Sumit Rathod';
+    const email = /*[[${email}]]*/ 'user@example.com';
+    const amount = /*[[${amount}]]*/ '0';
+
+    // Modal Logic
+    const modal = document.getElementById('receiptModal');
+    document.getElementById('viewBtn').addEventListener('click', () => {
+      modal.classList.remove('hidden');
+      generateQRCode();
+    });
+    document.getElementById('closeBtn').addEventListener('click', () => {
+      modal.classList.add('hidden');
+    });
+
+    // Generate QR Code
+    function generateQRCode() {
+      const qrcodeDiv = document.getElementById('qrcode');
+      qrcodeDiv.innerHTML = ''; // Clear previous QR code
+      
+      // Create QR code content
+      const qrContent = `Payment Receipt\nTransaction ID: ${transactionId}\nName: ${name}\nEmail: ${email}\nAmount: ₹${amount}\nDate: ${new Date().toLocaleString()}`;
+      
+      // Generate QR code
+      new QRCode(qrcodeDiv, {
+        text: qrContent,
+        width: 120,
+        height: 120,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
+
+    // Download PDF
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      const element = document.getElementById('receiptContent');
+      
+      // Check if signature image exists and is loaded
+      const signature = document.getElementById('signatureImg');
+      const logo = document.getElementById('logoImg');
+      const watermark = document.getElementById('watermarkImg');
+      
+      // Function to handle image loading
+      function checkImagesAndGenerate() {
+        let imagesLoaded = 0;
+        const totalImages = [signature, logo, watermark].filter(img => img && img.style.display !== 'none').length;
+        
+        if (totalImages === 0) {
+          generatePDF(element);
+          return;
+        }
+        
+        [signature, logo, watermark].forEach(img => {
+          if (img && img.style.display !== 'none') {
+            if (img.complete && img.naturalHeight !== 0) {
+              imagesLoaded++;
+            } else {
+              img.onload = () => {
+                imagesLoaded++;
+                if (imagesLoaded === totalImages) {
+                  generatePDF(element);
+                }
+              };
+              img.onerror = () => {
+                imagesLoaded++;
+                if (imagesLoaded === totalImages) {
+                  generatePDF(element);
+                }
+              };
+            }
           }
-        }, { once: true });
+        });
+        
+        if (imagesLoaded === totalImages) {
+          generatePDF(element);
+        }
       }
-    })();
+      
+      checkImagesAndGenerate();
+    });
 
-    // Lightweight confetti
+    function generatePDF(element) {
+      const opt = {
+        margin: 0.4,
+        filename: 'receipt.pdf',
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { 
+          scale: 3, 
+          useCORS: true, 
+          backgroundColor: '#ffffff',
+          logging: false,
+          onclone: function(clonedDoc) {
+            // Ensure all elements are properly styled in the clone
+            const receipt = clonedDoc.getElementById('receiptContent');
+            if (receipt) {
+              receipt.style.border = '4px solid #333';
+              receipt.style.borderRadius = '8px';
+              receipt.style.padding = '20px';
+              receipt.style.backgroundColor = '#fff';
+            }
+          }
+        },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+      
+      html2pdf().set(opt).from(element).save();
+    }
+
+    // Confetti animation
     (function confetti() {
       const canvas = document.getElementById('confettiCanvas');
       const ctx = canvas.getContext('2d');
       let W, H, particles = [];
+      
       function resize() {
         W = canvas.width = canvas.offsetWidth;
         H = canvas.height = canvas.offsetHeight;
       }
+      
       window.addEventListener('resize', resize);
       resize();
-
-      // Create particles
-      for (let i = 0; i < 120; i++) {
+      
+      for (let i = 0; i < 100; i++) {
         particles.push({
-          x: Math.random() * W,
+          x: Math.random() * W, 
           y: -20 - Math.random() * H * 0.5,
-          r: 3 + Math.random() * 4,
+          r: 3 + Math.random() * 4, 
           d: 2 + Math.random() * 3,
-          tilt: Math.random() * 10,
+          tilt: Math.random() * 10, 
           tiltAngle: Math.random() * Math.PI,
           rot: Math.random() * 0.1 + 0.01
         });
       }
-
+      
       function draw() {
         ctx.clearRect(0, 0, W, H);
         particles.forEach(p => {
-          p.y += p.d;
-          p.tiltAngle += p.rot;
+          p.y += p.d; 
+          p.tiltAngle += p.rot; 
           p.x += Math.sin(p.tiltAngle);
           ctx.beginPath();
-          // Let browser choose default colors for simplicity
           ctx.fillStyle = `hsl(${(p.y + p.x) % 360}, 80%, 60%)`;
           ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
           ctx.fill();
         });
       }
-
+      
       let start = performance.now();
       function animate(t) {
         draw();
-        // Stop after ~2.5s to save CPU
         if (t - start < 2500) requestAnimationFrame(animate);
         else ctx.clearRect(0, 0, W, H);
       }

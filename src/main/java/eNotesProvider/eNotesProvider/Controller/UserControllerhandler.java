@@ -20,6 +20,7 @@ import eNotesProvider.eNotesProvider.Service.EmailService;
 import eNotesProvider.eNotesProvider.Service.NoteService;
 import eNotesProvider.eNotesProvider.Service.PaymentService;
 import eNotesProvider.eNotesProvider.Service.UserService;
+import eNotesProvider.eNotesProvider.Service.VideoService;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
@@ -63,6 +64,9 @@ public class UserControllerhandler {
 
    @Autowired
     private AdminService adminService;
+
+    @Autowired
+    private VideoService videoService;
  
     @GetMapping({"/", "/home"})
     public String homePage() {
@@ -251,6 +255,7 @@ public String loginAdmin(@ModelAttribute("admin") AdminDto admin,
         List<NoteDto> notes = noteService.getAllNotes();
         model.addAttribute("notes", notes);
         model.addAttribute("notesCount", notes.size());
+            model.addAttribute("video", videoService.getAllVideos().size()); // Placeholder for video count
         model.addAttribute("usersCount", userService.getAllUsers().size());
         model.addAttribute("paymentsCount", paymentService.getAllPayments().size());
         model.addAttribute("plansCount", purchesedRepo.count()); // Assuming you have a method to count plans

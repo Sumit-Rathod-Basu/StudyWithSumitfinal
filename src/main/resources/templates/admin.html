@@ -20,6 +20,7 @@
         <a href="/user/admin/payments" class="block py-2 px-4 rounded-lg hover:bg-indigo-600 transition">💳 Payments</a>
         <a href="/user/payments/list" class="block py-2 px-4 rounded-lg hover:bg-indigo-600 transition">📦 Plans</a>
         <a href="/user/admins" class="block py-2 px-4 rounded-lg hover:bg-indigo-600 transition">Settings</a>
+        <a href="/videos/add" class="block py-2 px-4 rounded-lg hover:bg-indigo-600 transition">Upload videos</a>
 
     </nav>
     <div class="p-4 border-t border-indigo-600">
@@ -52,6 +53,10 @@
             <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition transform hover:-translate-y-1">
                 <h2 class="text-lg font-semibold text-gray-700">📘 Notes</h2>
                 <p class="text-3xl font-bold text-indigo-600 mt-2" th:text="${notesCount}">0</p>
+            </div>
+                        <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition transform hover:-translate-y-1">
+                <h2 class="text-lg font-semibold text-gray-700">Videos</h2>
+                <p class="text-3xl font-bold text-indigo-600 mt-2" th:text="${video}">0</p>
             </div>
             <!-- Users -->
             <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition transform hover:-translate-y-1">

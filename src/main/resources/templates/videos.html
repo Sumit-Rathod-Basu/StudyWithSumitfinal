@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>🎬 Video Library</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background: #f4f7fb;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            padding-top: 70px;
+        }
+
+        /* Navbar */
+        .navbar {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background: #212529;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        /* Upload Form */
+        .upload-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+        .upload-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Video Cards */
+        .video-card {
+            border-radius: 15px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .video-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .thumbnail-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 */
+            background: #000;
+        }
+        .thumbnail-wrapper img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            font-size: 2rem;
+            padding: 12px 20px;
+            border-radius: 50%;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .play-btn:hover {
+            background: rgba(0,0,0,0.9);
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+        .video-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+        .video-description {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Footer */
+        footer {
+            background: #212529;
+            color: #ddd;
+            padding: 25px 0;
+            margin-top: 50px;
+        }
+        footer a {
+            color: #bbb;
+            text-decoration: none;
+        }
+        footer a:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="#">🎬 Video Library</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#uploadForm">Upload</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Upload Form -->
+<div class="container my-4" id="uploadForm">
+    <div class="upload-card">
+        <h2>📤 Upload New Video</h2>
+        <form th:action="@{/videos/add}" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">Video Title</label>
+                <input type="text" name="title" class="form-control" placeholder="Enter video title" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-control" placeholder="Short description"></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Upload Video</label>
+                <input type="file" name="videoFile" class="form-control" accept="video/*" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Thumbnail</label>
+                <input type="file" name="thumbnailFile" class="form-control" accept="image/*" required />
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Upload</button>
+        </form>
+    </div>
+</div>
+
+<!-- All Videos -->
+<div class="container my-5">
+    <h2 class="text-center mb-4">📺 All Videos</h2>
+    <div class="row g-4">
+        <!-- Loop -->
+        <div class="col-md-4" th:each="video : ${videos}">
+            <div class="card video-card h-100">
+                <div class="thumbnail-wrapper">
+                    <img th:src="${video.thumbnailUrl}" alt="Video Thumbnail">
+                    <a th:href="${video.videoUrl}" target="_blank" class="play-btn">▶</a>
+                </div>
+                <div class="card-body">
+                    <h5 class="video-title" th:text="${video.title}">Sample Title</h5>
+                    <p class="video-description" th:text="${video.description}">Description...</p>
+                </div>
+                <div class="card-footer text-center">
+                    <a th:href="@{'/videos/delete/' + ${video.id}}" class="btn btn-danger btn-sm"
+                       onclick="return confirm('Are you sure you want to delete this video?');">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="container text-center">
+    <p class="mb-1">© 2025 Video Library. All rights reserved.</p>
+    <div>
+      <a href="#">Privacy Policy</a> | 
+      <a href="#">Terms</a> | 
+      <a href="#">Support</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
