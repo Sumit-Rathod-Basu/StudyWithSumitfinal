@@ -126,5 +126,10 @@ public paymentsDto updateStatusByNoteIdAndEmail(Long noteId, String email, Strin
     return paymentsConversion.toPaymentsDto(payment);
 }
 
+     public void deleteAllPayments() {
+        // TODO Auto-generated method
+        paymentRepository.deleteAll();
+     }
+
 
 }

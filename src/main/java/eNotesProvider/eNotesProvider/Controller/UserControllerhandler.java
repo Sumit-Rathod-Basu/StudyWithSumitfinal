@@ -520,5 +520,12 @@ public String listAdmins(Model model) {
     public String comingSoonPage() {
         return "comming-soon"; // Thymeleaf template name (coming-soon.html)
     }
+    @GetMapping("/deletep")
+    public String deleteAllPayments() {
+       
+            paymentService.deleteAllPayments();
+         
+        return "delets successfullly "; // Redirect back to payments page
+    }
 }
 

@@ -6,9 +6,9 @@
   <title>Payment Successful</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <meta name="color-scheme" content="light dark">
-  <!-- html2pdf for download -->
+  <!-- html2pdf -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <!-- QR Code library -->
+  <!-- QR Code -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
@@ -18,7 +18,7 @@
     <div class="bg-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
       <canvas id="confettiCanvas" class="absolute inset-0 pointer-events-none"></canvas>
 
-      <!-- Animated Check -->
+      <!-- Success Tick -->
       <div class="w-20 h-20 mx-auto mb-4 relative">
         <div class="absolute inset-0 rounded-full bg-green-100 animate-ping opacity-60"></div>
         <div class="relative rounded-full bg-green-500 w-20 h-20 flex items-center justify-center shadow">
@@ -69,7 +69,7 @@
 
       <p class="text-[12px] text-gray-400 text-center mt-4">
         You'll also receive a confirmation email shortly.
-          this is a partialy confermation receipt of payments & final confiramation are send to your regeterd email id.
+        This is a partial confirmation receipt. Final confirmation will be sent to your registered email.
       </p>
     </div>
   </div>
@@ -106,28 +106,24 @@
             <tr><td class="font-semibold p-1">Date</td><td class="p-1" id="modalDate">--</td></tr>
           </table>
 
-          <!-- QR Code and Signature -->
+          <!-- QR + Signature -->
           <div class="flex justify-between items-start mt-8">
-            <!-- QR Code -->
             <div>
               <div id="qrcode" class="mb-2"></div>
-              <p class="text-sm text-center">     -          </p>
+              <p class="text-sm text-center">Scan for details</p>
             </div>
-            
-            <!-- Signature -->
             <div class="text-right">
               <img id="signatureImg" src="/images/sig.png" alt="Signature" class="w-32 mx-auto" onerror="this.style.display='none'"/>
               <p class="text-sm">Authorized Signature</p>
-            
             </div>
           </div>
         </div>
       </div>
 
       <!-- Modal Actions -->
-      <div class="mt-4 flex justify-between">
-        <button id="downloadBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Download PDF</button>
-        <button id="closeBtn" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Close</button>
+      <div class="mt-4 flex flex-col sm:flex-row gap-3 justify-between">
+        <button id="downloadBtn" class="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Download PDF</button>
+        <button id="closeBtn" class="w-full sm:w-auto px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Close</button>
       </div>
     </div>
   </div>
@@ -142,13 +138,11 @@
       if (modalDate) modalDate.textContent = now;
     })();
 
-    // Get Thymeleaf variables
     const transactionId = /*[[${transactionId}]]*/ 'XXXXXXXX';
     const name = /*[[${name}]]*/ 'Sumit Rathod';
     const email = /*[[${email}]]*/ 'user@example.com';
     const amount = /*[[${amount}]]*/ '0';
 
-    // Modal Logic
     const modal = document.getElementById('receiptModal');
     document.getElementById('viewBtn').addEventListener('click', () => {
       modal.classList.remove('hidden');
@@ -158,145 +152,47 @@
       modal.classList.add('hidden');
     });
 
-    // Generate QR Code
+    // QR Code
     function generateQRCode() {
       const qrcodeDiv = document.getElementById('qrcode');
-      qrcodeDiv.innerHTML = ''; // Clear previous QR code
-      
-      // Create QR code content
+      qrcodeDiv.innerHTML = '';
       const qrContent = `Payment Receipt\nTransaction ID: ${transactionId}\nName: ${name}\nEmail: ${email}\nAmount: ₹${amount}\nDate: ${new Date().toLocaleString()}`;
-      
-      // Generate QR code
-      new QRCode(qrcodeDiv, {
-        text: qrContent,
-        width: 120,
-        height: 120,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-      });
+      new QRCode(qrcodeDiv, { text: qrContent, width: 120, height: 120, colorDark: "#000", colorLight: "#fff", correctLevel: QRCode.CorrectLevel.H });
     }
 
-    // Download PDF
+    // PDF Download
     document.getElementById('downloadBtn').addEventListener('click', () => {
       const element = document.getElementById('receiptContent');
-      
-      // Check if signature image exists and is loaded
-      const signature = document.getElementById('signatureImg');
-      const logo = document.getElementById('logoImg');
-      const watermark = document.getElementById('watermarkImg');
-      
-      // Function to handle image loading
-      function checkImagesAndGenerate() {
-        let imagesLoaded = 0;
-        const totalImages = [signature, logo, watermark].filter(img => img && img.style.display !== 'none').length;
-        
-        if (totalImages === 0) {
-          generatePDF(element);
-          return;
-        }
-        
-        [signature, logo, watermark].forEach(img => {
-          if (img && img.style.display !== 'none') {
-            if (img.complete && img.naturalHeight !== 0) {
-              imagesLoaded++;
-            } else {
-              img.onload = () => {
-                imagesLoaded++;
-                if (imagesLoaded === totalImages) {
-                  generatePDF(element);
-                }
-              };
-              img.onerror = () => {
-                imagesLoaded++;
-                if (imagesLoaded === totalImages) {
-                  generatePDF(element);
-                }
-              };
-            }
-          }
-        });
-        
-        if (imagesLoaded === totalImages) {
-          generatePDF(element);
-        }
-      }
-      
-      checkImagesAndGenerate();
+      generatePDF(element);
     });
 
     function generatePDF(element) {
       const opt = {
-        margin: 0.4,
+        margin: 20,
         filename: 'receipt.pdf',
         image: { type: 'jpeg', quality: 1 },
-        html2canvas: { 
-          scale: 3, 
-          useCORS: true, 
-          backgroundColor: '#ffffff',
-          logging: false,
-          onclone: function(clonedDoc) {
-            // Ensure all elements are properly styled in the clone
-            const receipt = clonedDoc.getElementById('receiptContent');
-            if (receipt) {
-              receipt.style.border = '4px solid #333';
-              receipt.style.borderRadius = '8px';
-              receipt.style.padding = '20px';
-              receipt.style.backgroundColor = '#fff';
-            }
-          }
-        },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        html2canvas: { scale: 2, letterRendering: true, useCORS: true, backgroundColor: '#fff' },
+        jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
       };
-      
       html2pdf().set(opt).from(element).save();
     }
 
-    // Confetti animation
+    // Confetti
     (function confetti() {
       const canvas = document.getElementById('confettiCanvas');
       const ctx = canvas.getContext('2d');
       let W, H, particles = [];
-      
-      function resize() {
-        W = canvas.width = canvas.offsetWidth;
-        H = canvas.height = canvas.offsetHeight;
-      }
-      
-      window.addEventListener('resize', resize);
-      resize();
-      
+      function resize() { W = canvas.width = canvas.offsetWidth; H = canvas.height = canvas.offsetHeight; }
+      window.addEventListener('resize', resize); resize();
       for (let i = 0; i < 100; i++) {
-        particles.push({
-          x: Math.random() * W, 
-          y: -20 - Math.random() * H * 0.5,
-          r: 3 + Math.random() * 4, 
-          d: 2 + Math.random() * 3,
-          tilt: Math.random() * 10, 
-          tiltAngle: Math.random() * Math.PI,
-          rot: Math.random() * 0.1 + 0.01
-        });
+        particles.push({ x: Math.random()*W, y: -20-Math.random()*H*0.5, r: 3+Math.random()*4, d: 2+Math.random()*3, tilt: Math.random()*10, tiltAngle: Math.random()*Math.PI, rot: Math.random()*0.1+0.01 });
       }
-      
       function draw() {
-        ctx.clearRect(0, 0, W, H);
-        particles.forEach(p => {
-          p.y += p.d; 
-          p.tiltAngle += p.rot; 
-          p.x += Math.sin(p.tiltAngle);
-          ctx.beginPath();
-          ctx.fillStyle = `hsl(${(p.y + p.x) % 360}, 80%, 60%)`;
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fill();
-        });
+        ctx.clearRect(0,0,W,H);
+        particles.forEach(p => { p.y+=p.d; p.tiltAngle+=p.rot; p.x+=Math.sin(p.tiltAngle); ctx.beginPath(); ctx.fillStyle=`hsl(${(p.y+p.x)%360},80%,60%)`; ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); });
       }
-      
       let start = performance.now();
-      function animate(t) {
-        draw();
-        if (t - start < 2500) requestAnimationFrame(animate);
-        else ctx.clearRect(0, 0, W, H);
-      }
+      function animate(t) { draw(); if (t-start<2500) requestAnimationFrame(animate); else ctx.clearRect(0,0,W,H); }
       requestAnimationFrame(animate);
     })();
   </script>
