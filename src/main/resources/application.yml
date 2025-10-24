@@ -17,9 +17,9 @@ spring:
     active: dev
 
   datasource:
-    url: jdbc:postgresql://dpg-d2k4vmm3jp1c73fqnegg-a.oregon-postgres.render.com:5432/enote_iby2
-    username: enote_iby2_user
-    password: FUJb8oYFbnckgom4uYKFqValzACpbRhp
+    url: jdbc:postgresql://dpg-d3tfpo0dl3ps73ed266g-a:5432/studywithsumit
+    username: studywithsumit_user
+    password: o9Mc33UPExjwcU8z3XP2orKlQ2kvwv6f
     driver-class-name: org.postgresql.Driver
   h2:
     console:
